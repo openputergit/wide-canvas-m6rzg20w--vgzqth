@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreeLanceNeo - Neo-brutalist Freelancing Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .neo-brutalist {
+            border: 3px solid #000;
+            box-shadow: 5px 5px 0px #000;
+            transition: all 0.2s ease;
+        }
+        .neo-brutalist:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px #000;
+        }
+        .neo-button {
+            background: #FF6B6B;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px #000;
+            transition: all 0.2s ease;
+        }
+        .neo-button:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px #000;
+        }
+        /* Progress Steps */
+        .step-container {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        .step {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            position: relative;
+            z-index: 1;
+        }
+        .step.active {
+            background: #FF6B6B;
+            color: white;
+        }
+        .step-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #000;
+            transform: translateY(-50%);
+            z-index: 0;
+        }
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .loading.show {
+            display: flex;
+        }
+    </style>
+</head>
+<body class="bg-[#E0F4FF] min-h-screen">
+    <!-- Loading Spinner -->
+    <div class="loading">
+        <div class="animate-spin rounded-full h-32 w-32 border-b-4 border-black"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- Step Progress -->
+        <div class="max-w-md mx-auto mb-8">
+            <div class="step-container">
+                <div class="step-line"></div>
+                <div class="step active" data-step="1">1</div>
+                <div class="step" data-step="2">2</div>
+                <div class="step" data-step="3">3</div>
+            </div>
+            <div class="flex justify-between text-sm">
+                <span>Account</span>
+                <span>Role</span>
+                <span>Details</span>
+            </div>
+        </div>
+
+        <!-- Step 1: Account Creation -->
+        <div id="step1" class="max-w-md mx-auto bg-white neo-brutalist p-8">
+            <h1 class="text-4xl font-bold mb-6 text-center">Create Account</h1>
+            <form id="accountForm" class="space-y-4">
+                <div>
+                    <label class="block font-bold mb-2">Email</label>
+                    <input type="email" class="w-full p-2 neo-brutalist" required>
+                </div>
+                <div>
+                    <label class="block font-bold mb-2">Password</label>
+                    <input type="password" class="w-full p-2 neo-brutalist" required>
+                </div>
+                <button type="submit" class="w-full neo-button text-white font-bold py-2 px-4">
+                    Continue
+                </button>
+            </form>
+            
+            <div class="mt-6 space-y-3">
+                <button onclick="socialLogin('google')" class="w-full neo-button bg-white text-black font-bold py-2 px-4 flex items-center justify-center gap-2">
+                    <i class="bi bi-google"></i> Continue with Google
+                </button>
+                <button onclick="socialLogin('facebook')" class="w-full neo-button bg-blue-600 text-white font-bold py-2 px-4 flex items-center justify-center gap-2">
+                    <i class="bi bi-facebook"></i> Continue with Facebook
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 2: Role Selection -->
+        <div id="step2" class="max-w-md mx-auto bg-white neo-brutalist p-8 hidden">
+            <h1 class="text-4xl font-bold mb-6 text-center">Choose Your Role</h1>
+            <div class="space-y-4">
+                <button onclick="selectRole('freelancer')" class="w-full neo-button bg-yellow-400 text-black font-bold py-6 px-4 flex flex-col items-center gap-2">
+                    <i class="bi bi-person-workspace text-4xl"></i>
+                    <span>I'm a Freelancer</span>
+                    <span class="text-sm">Looking for work opportunities</span>
+                </button>
+                <button onclick="selectRole('client')" class="w-full neo-button bg-green-400 text-black font-bold py-6 px-4 flex flex-col items-center gap-2">
+                    <i class="bi bi-building text-4xl"></i>
+                    <span>I'm a Client</span>
+                    <span class="text-sm">Looking to hire talent</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: Role-Specific Details -->
+        <div id="step3" class="max-w-md mx-auto bg-white neo-brutalist p-8 hidden">
+            <!-- Freelancer Form -->
+            <div id="freelancerForm" class="hidden">
+                <h1 class="text-4xl font-bold mb-6 text-center">Freelancer Details</h1>
+                <form class="space-y-4">
+                    <div>
+                        <label class="block font-bold mb-2">Full Name</label>
+                        <input type="text" class="w-full p-2 neo-brutalist" required>
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-2">Skills (comma-separated)</label>
+                        <input type="text" class="w-full p-2 neo-brutalist" required>
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-2">Hourly Rate ($)</label>
+                        <input type="number" class="w-full p-2 neo-brutalist" required>
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-2">Portfolio URL</label>
+                        <input type="url" class="w-full p-2 neo-brutalist">
+                    </div>
+                    <button type="submit" class="w-full neo-button bg-yellow-400 text-black font-bold py-2 px-4">
+                        Complete Profile
+                    </button>
+                </form>
+            </div>
+
+            <!-- Client Form -->
+            <div id="clientForm" class="hidden">
+                <h1 class="text-4xl font-bold mb-6 text-center">Client Details</h1>
+                <form class="space-y-4">
+                    <div>
+                        <label class="block font-bold mb-2">Company Name</label>
+                        <input type="text" class="w-full p-2 neo-brutalist" required>
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-2">Industry</label>
+                        <input type="text" class="w-full p-2 neo-brutalist" required>
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-2">Company Size</label>
+                        <select class="w-full p-2 neo-brutalist" required>
+                            <option>1-10 employees</option>
+                            <option>11-50 employees</option>
+                            <option>51-200 employees</option>
+                            <option>201+ employees</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full neo-button bg-green-400 text-black font-bold py-2 px-4">
+                        Complete Profile
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const loading = document.querySelector('.loading');
+        let currentStep = 1;
+        let selectedRole = null;
+
+        function showLoading() {
+            loading.classList.add('show');
+        }
+
+        function hideLoading() {
+            loading.classList.remove('show');
+        }
+
+        function updateSteps(step) {
+            document.querySelectorAll('.step').forEach(s => {
+                if (parseInt(s.dataset.step) <= step) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+        }
+
+        function showStep(step) {
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step3').classList.add('hidden');
+            document.getElementById(`step${step}`).classList.remove('hidden');
+            currentStep = step;
+            updateSteps(step);
+        }
+
+        function socialLogin(provider) {
+            showLoading();
+            setTimeout(() => {
+                hideLoading();
+                showStep(2);
+            }, 1500);
+        }
+
+        function selectRole(role) {
+            selectedRole = role;
+            document.getElementById('freelancerForm').classList.add('hidden');
+            document.getElementById('clientForm').classList.add('hidden');
+            document.getElementById(`${role}Form`).classList.remove('hidden');
+            showStep(3);
+        }
+
+        // Form Submissions
+        document.getElementById('accountForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            showLoading();
+            setTimeout(() => {
+                hideLoading();
+                showStep(2);
+            }, 1500);
+        });
+
+        document.querySelectorAll('#step3 form').forEach(form => {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                showLoading();
+                setTimeout(() => {
+                    hideLoading();
+                    alert(`${selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)} profile created successfully!`);
+                    // Redirect to dashboard (mock)
+                    window.location.href = `/${selectedRole}-dashboard`;
+                }, 1500);
+            });
+        });
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
